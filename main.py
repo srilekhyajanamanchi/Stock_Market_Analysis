@@ -1,17 +1,32 @@
-# This is a sample Python script.
+import pandas as pd
+import os
+from tqdm import tqdm
 
+data = pd.read_csv(r"C:\Users\srile\Downloads\archive\FullDataCsv\master.csv")
+print(data.head())
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+# Initialize an empty list to store DataFrames
+dfs = []
 
+# Loop through each file in the directory
+for file in os.listdir(r"C:\Users\srile\Downloads\archive\FullDataCsv"):
+    if file.endswith('.csv'):
+        df = pd.read_csv(os.path.join(r"C:\Users\srile\Downloads\archive\FullDataCsv", file))
+        df['Stock'] = file.split('.')[0]  # Adding a column to identify the stock (based on the filename)
+        dfs.append(df)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# Concatenate all DataFrames
+merged_df = pd.concat(dfs, ignore_index=True)
 
+print(merged_df.head()) # added comment
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# Example categorization (if you have a 'volume' column)
+volume = merged_df['volume'].unique()  # Get unique volumes
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Initialize tqdm with the number of unique volumes for the progress bar
+for vol in tqdm(volume, desc='Processing Volumes'):
+    volume_df = merged_df[merged_df['volume'] == vol]  # Filter the DataFrame by volume
+    print(f'volume: {vol}, Data:\n', volume_df.head())
+
+# Save the merged data to a new CSV file
+merged_df.to_csv('merged_stock_data.csv', index=False)
